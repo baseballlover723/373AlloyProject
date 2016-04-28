@@ -19,13 +19,14 @@ fact Reliable {
 	no d: Data | d not in Sender.buffer + Receiver.buffer
 }
 
+
 fact Convience {
 	#Sender = #Receiver
 	#Stream = 2.mul[#State]
 }
 
 pred Init[s: State] {
-	#sender.buffer > 0
+	#s.sender.buffer > 0
 }
 
 pred End[s: State] {
@@ -34,9 +35,10 @@ pred End[s: State] {
 }
 
 pred Transition[s, s': State] {
-	one d: s.sender.buffer |
+	one d: s.sender.buffer | (
 		RdtSend[s, s', d] and
 		RdtRcv[s, s', d]
+	)
 }
 
 pred RdtSend[s, s': State, d: Data] {
@@ -52,7 +54,7 @@ pred UdtSend[s, s': State, p: Data] {
 }
 
 pred RdtRcv[s, s': State, d: Data] {
-	DeliverData[s, s', Extract(d)]
+	DeliverData[s, s', Extract[d]]
 }
 
 fun Extract[d: Data]: Data {
@@ -63,15 +65,24 @@ pred DeliverData[s, s': State, d: Data] {
 	s'.receiver.buffer = s.receiver.buffer + d
 }
 
+pred Progress[s, s': State] {
+	#s.sender.buffer > #s'.sender.buffer
+}
+
 pred Trace {
 	first.Init
 	all s: State-last |
 		let s' = s.next |
-			Transition[s, s']
-	//last.End
+			Transition[s, s'] and Progress[s, s']
+	last.End
+}
+
+assert transferAllData {
+	Trace => last.End
 }
 
 run Trace for 3 State, 2 Data, 10 Stream
 run Init for 1 State, exactly 5 Data
 run End for 1 State, exactly 5 Data
 
+check transferAllData for 3 State, 2 Data, 10 Stream
