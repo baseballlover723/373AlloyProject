@@ -7,17 +7,18 @@ sig State {
 	receiver: one Receiver,
 	protocol: one Protocol
 }
-sig Protocol {
-}
 
-sig Stream {
+abstract sig Stream {
 	buffer: set Data
 }
-sig Sender extends Stream {}
-sig Receiver extends Stream {}
+one sig Sender extends Stream {}
+one sig Receiver extends Stream {}
 
 sig Data {
+}
 
+fact Reliable {
+	no d: Data | d not in Sender.buffer + Receiver.buffer
 }
 
 pred Init[s: State] {
@@ -26,15 +27,11 @@ pred Init[s: State] {
 
 pred End[s: State] {
 	first.sender.buffer in s.receiver.buffer
+	#s.sender.buffer = 0
 }
 
 pred Transition[s, s': State] {
-	one p: Position | (
-		s'.board = s.board + p and 
-		p not in s.board and 
-		p.value in s.turn
-	)
-	s'.turn != s.turn
+	
 }
 
 pred Trace {
@@ -44,4 +41,10 @@ pred Trace {
 			Transition[s, s']
 	last.End
 }
+
+run Trace for 1 State, exactly 5 Data, exactly 1 Protocol
+
+run Init for 1 State, exactly 5 Data, exactly 1 Protocol
+run End for 1 State, exactly 5 Data, exactly 1 Protocol
+
 
