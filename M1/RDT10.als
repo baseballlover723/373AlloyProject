@@ -82,7 +82,4 @@ assert transferAllData {
 }
 
 run Trace for 3 State, 2 Data, 10 Stream
-run Init for 1 State, exactly 5 Data
-run End for 1 State, exactly 5 Data
-
 check transferAllData for 3 State, 2 Data, 10 Stream
