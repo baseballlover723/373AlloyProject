@@ -162,15 +162,12 @@ pred Trace {
 	first.Init
 	all s: State - last |
 		Transition[s] and Progress[s] and CorrectNextState[s]
-}
-
-pred WinTrace {
-	Trace and last.End	
+	last.End[]
 }
 
 assert transferAllData {
 	Trace[] => last.End[]
 }
 
-run WinTrace for 6 State, 2 Data, 6 Stream, 6 Packet
-check transferAllData for 3 State, 1 Data, 10 Stream, 1 Packet
+run Trace for 6 State, 2 Data, 6 Stream, 6 Packet
+check transferAllData for 3 State, 2 Data, 10 Stream, 2 Packet
